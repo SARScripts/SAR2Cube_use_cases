@@ -1,0 +1,328 @@
+{
+  "process_graph": {
+    "1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2018-06-01T00:00:00Z",
+          "2018-06-30T23:59:59Z"
+        ],
+        "spatial_extent": {
+          "east": 11.202020645141603,
+          "south": 46.64813992180177,
+          "north": 46.687955702208626,
+          "west": 11.122198104858398
+        },
+        "id": "SAR2Cube_L0_117_ASC_ST_2016_2020_IFG_LIA_DEM",
+        "properties": {},
+        "bands": []
+      }
+    },
+    "2": {
+      "process_id": "coherence",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        }
+      }
+    },
+    "9": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "wavelengths": [],
+        "bands": [
+          "grid_lon",
+          "grid_lat"
+        ]
+      }
+    },
+    "11": {
+      "process_id": "aggregate_spatial_window",
+      "arguments": {
+        "data": {
+          "from_node": "22"
+        },
+        "size": [
+          19,
+          4
+        ],
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "12": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "19"
+        },
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "vhijhs38e": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "tzyahop5h"
+                }
+              }
+            },
+            "ks6xripd0": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "u5eaqduq0"
+                },
+                "y": {
+                  "from_node": "vhijhs38e"
+                }
+              }
+            },
+            "2z56jc7uv": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "i_VV"
+              }
+            },
+            "tzyahop5h": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "q_VV"
+              }
+            },
+            "nwvcyuxcu": {
+              "result": true,
+              "process_id": "power",
+              "arguments": {
+                "p": 0.5,
+                "base": {
+                  "from_node": "ks6xripd0"
+                }
+              }
+            },
+            "u5eaqduq0": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "2z56jc7uv"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "13": {
+      "process_id": "rename_labels",
+      "arguments": {
+        "data": {
+          "from_node": "12"
+        },
+        "source": [],
+        "dimension": "bands",
+        "target": [
+          "COH_VV"
+        ]
+      }
+    },
+    "14": {
+      "process_id": "rename_labels",
+      "arguments": {
+        "data": {
+          "from_node": "15"
+        },
+        "source": [],
+        "dimension": "bands",
+        "target": [
+          "COH_VH"
+        ]
+      }
+    },
+    "15": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "19"
+        },
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "nghhsofj2": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "i_VH"
+              }
+            },
+            "l07q6wffb": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "jzcz3p7jb"
+                }
+              }
+            },
+            "nbtjw74xu": {
+              "result": true,
+              "process_id": "power",
+              "arguments": {
+                "p": 0.5,
+                "base": {
+                  "from_node": "6tmemct1n"
+                }
+              }
+            },
+            "6tmemct1n": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "0qyftco41"
+                },
+                "y": {
+                  "from_node": "l07q6wffb"
+                }
+              }
+            },
+            "jzcz3p7jb": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "q_VH"
+              }
+            },
+            "0qyftco41": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "nghhsofj2"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "16": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "14"
+        },
+        "cube1": {
+          "from_node": "13"
+        }
+      }
+    },
+    "19": {
+      "process_id": "aggregate_spatial_window",
+      "arguments": {
+        "data": {
+          "from_node": "2"
+        },
+        "size": [
+          19,
+          4
+        ],
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "20": {
+      "process_id": "geocode",
+      "arguments": {
+        "data": {
+          "from_node": "23"
+        },
+        "crs": 32632,
+        "resolution": 20
+      }
+    },
+    "21": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "20"
+        },
+        "format": "NETCDF"
+      },
+      "result": true
+    },
+    "22": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "9"
+        },
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "temporal"
+      }
+    },
+    "23": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "16"
+        },
+        "cube1": {
+          "from_node": "11"
+        }
+      }
+    }
+  }
+}

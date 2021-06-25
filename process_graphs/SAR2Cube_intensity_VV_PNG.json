@@ -1,0 +1,251 @@
+{
+  "process_graph": {
+    "1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2019-04-01T00:00:00Z",
+          "2019-04-07T23:59:59Z"
+        ],
+        "spatial_extent": {
+          "east": 11.277122497558594,
+          "south": 46.619732651929496,
+          "north": 46.74691863249299,
+          "west": 11.04572296142578
+        },
+        "id": "SAR2Cube_L0_117_ASC_ST_2016_2020_IFG_LIA_DEM",
+        "bands": [],
+        "properties": {}
+      }
+    },
+    "2": {
+      "process_id": "aggregate_spatial_window",
+      "arguments": {
+        "boundary": "trim",
+        "data": {
+          "from_node": "3"
+        },
+        "size": [
+          19,
+          4
+        ],
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "3": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "mxa7px21t": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "q_VV"
+              }
+            },
+            "4aapejbd3": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "3wcedunm4"
+                },
+                "y": {
+                  "from_node": "uhjusxjsz"
+                }
+              }
+            },
+            "luxed5v2o": {
+              "result": true,
+              "process_id": "power",
+              "arguments": {
+                "p": 0.5,
+                "base": {
+                  "from_node": "4aapejbd3"
+                }
+              }
+            },
+            "3wcedunm4": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "ux15vkub6"
+                }
+              }
+            },
+            "uhjusxjsz": {
+              "process_id": "power",
+              "arguments": {
+                "p": 2,
+                "base": {
+                  "from_node": "mxa7px21t"
+                }
+              }
+            },
+            "ux15vkub6": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "i_VV"
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "6": {
+      "result": true,
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "34"
+        },
+        "format": "PNG"
+      }
+    },
+    "8": {
+      "process_id": "geocode",
+      "arguments": {
+        "data": {
+          "from_node": "11"
+        },
+        "crs": 32632,
+        "resolution": 20
+      }
+    },
+    "9": {
+      "process_id": "aggregate_spatial_window",
+      "arguments": {
+        "data": {
+          "from_node": "10"
+        },
+        "size": [
+          19,
+          4
+        ],
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "10": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "wavelengths": [],
+        "bands": [
+          "grid_lon",
+          "grid_lat"
+        ]
+      }
+    },
+    "11": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "9"
+        },
+        "cube1": {
+          "from_node": "12"
+        }
+      }
+    },
+    "12": {
+      "process_id": "rename_labels",
+      "arguments": {
+        "data": {
+          "from_node": "2"
+        },
+        "source": [],
+        "dimension": "bands",
+        "target": [
+          "VV"
+        ]
+      }
+    },
+    "33": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "8"
+        },
+        "context": "",
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "temporal"
+      }
+    },
+    "34": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "linear_scale_range",
+              "arguments": {
+                "inputMax": 200,
+                "inputMin": 0,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "outputMax": 255
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "33"
+        },
+        "context": ""
+      }
+    }
+  }
+}
