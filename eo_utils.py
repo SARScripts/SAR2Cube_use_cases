@@ -2,9 +2,9 @@
 from time import time
 import rasterio
 import numpy as np
-import openeo
-from openeo.rest.datacube import PGNode, THIS
-from openeo.processes import *
+# import openeo
+# from openeo.rest.datacube import PGNode, THIS
+# from openeo.processes import *
 import math
 import xarray as xr
 import rioxarray
@@ -49,13 +49,13 @@ class openeoMap:
         self.point_coords = []
         self.figure = None
         self.figure_widget = None
-        feature_collection = {
+        self.feature_collection = {
             'type': 'FeatureCollection',
             'features': []
         }
 
         draw = DrawControl(
-            circlemarker={}, polyline={}, polygon={},
+            circlemarker={}, polyline={},
             marker= {"shapeOptions": {
                        "original": {},
                        "editing": {},
@@ -63,16 +63,19 @@ class openeoMap:
             rectangle = {"shapeOptions": {
                        "original": {},
                        "editing": {},
+            }},
+            polygon = {"shapeOptions": {
+                       "original": {},
+                       "editing": {},
             }})
 
         self.map.add_control(draw)
         def handle_draw(target, action, geo_json):
-            feature_collection['features'] = []
-            feature_collection['features'].append(geo_json)
-            if feature_collection['features'][0]['geometry']['type'] == 'Point':
-                self.point_coords = feature_collection['features'][0]['geometry']['coordinates']
+            self.feature_collection['features'].append(geo_json)
+            if self.feature_collection['features'][0]['geometry']['type'] == 'Point':
+                self.point_coords = self.feature_collection['features'][0]['geometry']['coordinates']
             else:
-                coords = feature_collection['features'][0]['geometry']['coordinates'][0]
+                coords = self.feature_collection['features'][0]['geometry']['coordinates'][0]
                 polygon = shapely.geometry.Polygon(coords)
                 self.bbox = polygon.bounds
         
@@ -145,7 +148,10 @@ def addLayer(inMap,path,name,clip=[0,0.8],bands=None):
     def set_opacity(change):
         l.opacity = change['new']
     if(len(rds4326.variable)==3):
-        rds4326 = rds4326.clip(clip[0],clip[1])/clip[1]*255
+        rds4326 = rds4326.where(rds4326>clip[0])
+        rds4326 = rds4326.where(rds4326<clip[1])
+        rds4326 = rds4326.rio.write_nodata(np.nan)
+        rds4326 = rds4326/clip[1]*255
         rds4326 = rds4326.chunk((1000, 1000))
         l = rds4326.leaflet.plot(inMap.map, rgb_dim='variable')
  
@@ -154,7 +160,9 @@ def addLayer(inMap,path,name,clip=[0,0.8],bands=None):
         inMap.map.add_control(slider_control)
     elif(len(rds4326.variable)==1):
         rds4326 = rds4326[0]
-        rds4326 = rds4326.clip(clip[0],clip[1])
+        rds4326 = rds4326.where(rds4326>clip[0])
+        rds4326 = rds4326.where(rds4326<clip[1])
+        rds4326 = rds4326.rio.write_nodata(np.nan)
         rds4326 = rds4326.chunk((1000, 1000))
         cmap = plt.cm.get_cmap('Greys_r')
         l = rds4326.leaflet.plot(inMap.map,colormap=cmap)
@@ -167,7 +175,9 @@ def addLayer(inMap,path,name,clip=[0,0.8],bands=None):
     else:
         rds4326 = rds4326[0]
         rds4326 = rds4326.chunk((1000, 1000))
-        rds4326 = rds4326.clip(clip[0],clip[1])
+        rds4326 = rds4326.where(rds4326>clip[0])
+        rds4326 = rds4326.where(rds4326<clip[1])
+        rds4326 = rds4326.rio.write_nodata(np.nan)
         cmap = plt.cm.get_cmap('Greys_r')
         l = rds4326.leaflet.plot(inMap.map,colormap=cmap)
         def set_opacity(change):
